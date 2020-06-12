@@ -51,7 +51,7 @@ E_series = {'E3':  [1.0, 2.2, 4.7],
 
 
 def str2num(str='0'):
-    """Converts strings with SI magnitude prefixes into correspinding float
+"""Converts strings with SI magnitude prefixes into correspinding float
 numbers, for example 1k45 to 1450, or .33u to 3.3e-7."""
     str = str.strip()
     original_str = str
@@ -74,3 +74,17 @@ numbers, for example 1k45 to 1450, or .33u to 3.3e-7."""
         print('ERROR in eecommon.py/str2num(): Unable to convert \'{0}\' \
 into a number.'.format(original_str))
         return float('nan')
+
+#####
+
+def pres(res_list):
+"""Parallel Resistance Adder"""
+    sum = 0
+    product = 1
+    for r in res_list:
+        sum += r
+        product *= r
+    return product/sum
+
+#####
+
