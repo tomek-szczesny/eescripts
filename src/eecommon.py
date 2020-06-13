@@ -1,7 +1,7 @@
 """EEscripts common functions and constants
 """
 
-
+from functools import reduce
 
 # 79 characters width for reference: ------------------------------------------
 
@@ -51,8 +51,8 @@ E_series = {'E3':  [1.0, 2.2, 4.7],
 
 
 def str2num(str='0'):
-"""Converts strings with SI magnitude prefixes into correspinding float
-numbers, for example 1k45 to 1450, or .33u to 3.3e-7."""
+    """Converts strings with SI magnitude prefixes into correspinding float
+    numbers, for example 1k45 to 1450, or .33u to 3.3e-7."""
     str = str.strip()
     original_str = str
     str = str.lower()
@@ -77,14 +77,18 @@ into a number.'.format(original_str))
 
 #####
 
-def pres(res_list):
-"""Parallel Resistance Adder"""
-    sum = 0
-    product = 1
-    for r in res_list:
-        sum += r
-        product *= r
-    return product/sum
+def pres2(r1, r2):
+    """Parallel Resistance Adder - two resistors"""
+    return r1*r2/(r1+r2)
+
+#####
+
+def pres(*args):
+    """Parallel Resistance Adder - general form
+    works with multiple numeric arguments or single list of resistances"""
+    if type(args[0]) == type([1,2]):
+        return reduce(pres2,args[0])
+    return reduce(pres2,args)
 
 #####
 
