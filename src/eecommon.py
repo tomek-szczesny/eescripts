@@ -81,7 +81,7 @@ def rnd2srs(val, series='E24'):
     """Round to series - finds the closest value within the selected series"""
     e = m.floor(m.log10(val))
     s = val/10**e
-    srs = E_series.get(series)
+    srs = E_series.get(series).copy()
     if srs == None:
         return val
     srs += [srs[0]*10]
