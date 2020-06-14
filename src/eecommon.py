@@ -82,6 +82,8 @@ def rnd2srs(val, series='E24'):
     e = m.floor(m.log10(val))
     s = val/10**e
     srs = E_series.get(series)
+    if srs == None:
+        return val
     srs += [srs[0]*10]
     err = list(map(lambda a: max(a,s)/min(a,s), srs))
     return srs[np.argmin(err)]*10**e
