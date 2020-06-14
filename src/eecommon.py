@@ -72,9 +72,23 @@ def str2num(str='0'):
                 return float(str)*10**factor
         return float(str)
     except:
+        # TODO: Throw a proper exception
         print('ERROR in eecommon.py/str2num(): Unable to convert \'{0}\' \
 into a number.'.format(original_str))
         return float('nan')
+#####
+
+def ratiosrs(divident, divider=1, series='E24'):
+    """Ratio in series - finds a pair of values within series with a given ratio"""
+    ratio = divident/divider
+    # TODO: Immunity against illegal series name
+    srs = E_series.get(series)
+    expected = [a*ratio for a in srs]
+    actual = list(map(lambda a: rnd2srs(a, series), expected))
+    errors = list(map(lambda a,b: max(a,b)/min(a,b), expected, actual))
+    best = np.argmin(errors)
+    return (actual[best],srs[best])
+
 #####
 
 def rnd2srs(val, series='E24'):
@@ -91,7 +105,7 @@ def rnd2srs(val, series='E24'):
 #####
 
 def pres(*args):
-    """Parallel Resistance Adder - general form
+    """Parallel Resistance Adder
     works with multiple numeric arguments or single list of resistances"""
     if type(args[0]) == type(list()):
         return reduce(pres2,args[0])
