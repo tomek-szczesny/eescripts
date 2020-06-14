@@ -1,7 +1,8 @@
-"""EEscripts common functions and constants
-"""
+"""EEscripts common functions and constants"""
 
 from functools import reduce
+import math as m
+import numpy as np
 
 # 79 characters width for reference: ------------------------------------------
 
@@ -74,6 +75,25 @@ def str2num(str='0'):
         print('ERROR in eecommon.py/str2num(): Unable to convert \'{0}\' \
 into a number.'.format(original_str))
         return float('nan')
+#####
+
+def rnd2srs(val, series='E24'):
+    """Round to series - finds the closest value within the selected series"""
+    e = m.floor(m.log10(val))
+    s = val/10**e
+    srs = E_series.get(series)
+    srs += [srs[0]*10]
+    err = list(map(lambda a: max(a,s)/min(a,s), srs))
+    return srs[np.argmin(err)]*10**e
+
+#####
+
+def pres(*args):
+    """Parallel Resistance Adder - general form
+    works with multiple numeric arguments or single list of resistances"""
+    if type(args[0]) == type(list()):
+        return reduce(pres2,args[0])
+    return reduce(pres2,args)
 
 #####
 
@@ -82,13 +102,3 @@ def pres2(r1, r2):
     return r1*r2/(r1+r2)
 
 #####
-
-def pres(*args):
-    """Parallel Resistance Adder - general form
-    works with multiple numeric arguments or single list of resistances"""
-    if type(args[0]) == type([1,2]):
-        return reduce(pres2,args[0])
-    return reduce(pres2,args)
-
-#####
-
