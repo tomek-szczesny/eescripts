@@ -54,6 +54,7 @@ E_series = {'E3':  [1.0, 2.2, 4.7],
 class vsrs:
     """Class for storing values in selected series. Converts floats into closest
     value in series upon construction, allows incrementing and decrementing etc."""
+
     def __init__(self, value, series='E24'):
         #TODO: Handle invalid series
         self.s = series
@@ -65,20 +66,21 @@ class vsrs:
         i = np.argmin(err)
         self.e += m.floor(i / len(srs[:-1]))
         self.i  =         i % len(srs[:-1])
+
     def __eq__(self, other):
         if type(self) == type(other):
-            if (self.e == other.e) and (self.i == other.i):
-                return True
-            else:
-                return False
+            return self.f() == other.f()
         else:
             return self.f() == other
+
     def __float__(self):
         srs = E_series.get(self.s)
         return srs[self.i]*10**self.e
+
     def __str__(self):
         #TODO: Return string in engineer friendly format
         return str(float(self))
+
     def inc(self):
         srs = E_series.get(self.s)
         self.i +=1
@@ -86,6 +88,7 @@ class vsrs:
             self.e += 1
             self.i = 0
         return float(self)
+
     def dec(self):
         srs = E_series.get(self.s)
         self.i -=1
@@ -93,6 +96,7 @@ class vsrs:
             self.e -= 1
             self.i += len(srs)
         return float(self)
+
     def f(self):
         return float(self)
 
@@ -106,7 +110,6 @@ def str2num(str='0'):
     str = str.replace(',','.')
     str = '0' + str
     try:
-        # handles "meg" first so it won't get processed as milli-, exa- or giga-.
         if str.find('meg') >= 0:
             str = str.replace('meg','.')
             str = str.rstrip('.')
@@ -126,7 +129,11 @@ into a number.'.format(original_str))
 
 ##### TODO: FINISH THE FOLLOWING FUNCTION
 def srsratio(ratio, series='E24'):
-    #TODO: Convert int or float ratio into a single element list
+    """Finds a set of values in series with given inter-element ratios.
+Accepts a ratio in form of a single number or any iterable.
+Useful for scaling existing resistor networks or building voltage dividers.""" 
+    if type(ratio) == type(float()) or type(ratio) == type(int()):
+        ratio = [ratio] + [1]
     ratio = list(ratio)
     if len(ratio) == 1:
         ratio += [1]
@@ -138,14 +145,9 @@ def srsratio(ratio, series='E24'):
         div = [p.f()/r for p,r in zip(proposed, ratio)]
         error.append(max(div)/min(div))
         proposed[np.argmin(div)].inc()
-#        if min([i.e for i in proposed]) > 0:
-#            for i in range(len(proposed)):
-#                proposed[i].e -=1
-    print([i for i in checked[np.argmin(error)]])
-    print (error)
-    pass
-
-
+    out = list(zip(checked, error))
+    out.sort(key=lambda a:a[1])
+    return out
 
 #####
 
