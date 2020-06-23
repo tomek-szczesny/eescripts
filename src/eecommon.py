@@ -8,6 +8,7 @@ import numpy as np
 
 SI_pfx   = {'f': -15, 'p': -12, 'n': -9, 'u': -6, 'm': -3,
             'k':   3, 'meg': 6, 'g':  9, 't': 12}
+
 E_series = {'E3':  [1.0, 2.2, 4.7],
             'E6':  [1.0, 1.5, 2.2, 3.3, 4.7, 6.8],
             'E12': [1.0, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2],
@@ -50,6 +51,51 @@ E_series = {'E3':  [1.0, 2.2, 4.7],
                     9.76, 9.88]}
 
 
+class vsrs:
+    """Class for storing values in selected series. Converts floats into closest
+    value in series upon construction, allows incrementing and decrementing etc."""
+    def __init__(self, value, series='E24'):
+        #TODO: Handle invalid series
+        self.s = series
+        self.e = m.floor(m.log10(value))
+        s = value/10**self.e
+        srs = E_series.get(series).copy()
+        srs += [srs[0]*10]
+        err = list(map(lambda a: max(a,s)/min(a,s), srs))
+        i = np.argmin(err)
+        self.e += m.floor(i / len(srs[:-1]))
+        self.i  =         i % len(srs[:-1])
+    def __eq__(self, other):
+        if type(self) == type(other):
+            if (self.e == other.e) and (self.i == other.i):
+                return True
+            else:
+                return False
+        else:
+            return self.f() == other
+    def __float__(self):
+        srs = E_series.get(self.s)
+        return srs[self.i]*10**self.e
+    def __str__(self):
+        #TODO: Return string in engineer friendly format
+        return str(float(self))
+    def inc(self):
+        srs = E_series.get(self.s)
+        self.i +=1
+        if self.i >= len(srs):
+            self.e += 1
+            self.i = 0
+        return float(self)
+    def dec(self):
+        srs = E_series.get(self.s)
+        self.i -=1
+        if self.i < 0:
+            self.e -= 1
+            self.i += len(srs)
+        return float(self)
+    def f(self):
+        return float(self)
+
 
 def str2num(str='0'):
     """Converts strings with SI magnitude prefixes into correspinding float
@@ -78,7 +124,32 @@ into a number.'.format(original_str))
         return float('nan')
 #####
 
-def ratiosrs(divident, divider=1, series='E24'):
+##### TODO: FINISH THE FOLLOWING FUNCTION
+def srsratio(ratio, series='E24'):
+    #TODO: Convert int or float ratio into a single element list
+    ratio = list(ratio)
+    if len(ratio) == 1:
+        ratio += [1]
+    proposed = [vsrs(1,series=series) for i in range(len(ratio))]
+    checked = []
+    error = []
+    while min([i.e for i in proposed]) == 0:
+        checked.append([i.f() for i in proposed].copy())
+        div = [p.f()/r for p,r in zip(proposed, ratio)]
+        error.append(max(div)/min(div))
+        proposed[np.argmin(div)].inc()
+#        if min([i.e for i in proposed]) > 0:
+#            for i in range(len(proposed)):
+#                proposed[i].e -=1
+    print([i for i in checked[np.argmin(error)]])
+    print (error)
+    pass
+
+
+
+#####
+
+def ratiosrs2(divident, divider=1, series='E24'):
     """Ratio in series - finds a pair of values within series with a given ratio"""
     ratio = divident/divider
     # TODO: Immunity against illegal series name
